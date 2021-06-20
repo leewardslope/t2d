@@ -1,8 +1,14 @@
 #! /bin/bash
 
-RED="\033[1;31m"
-GREEN="\033[1;32m"
-NOCOLOR="\033[0m"
+# Using tput will eliminate the usage of "-e" in echo, and can be used anywhere
 
-echo -e "This is ${GREEN}Green ${NOCOLOR}Colour"
-echo -e "This is ${RED}RED ${NOCOLOR}Colour"
+RED="$(tput setaf 1)"
+GREEN="$(tput setaf 2)"
+YELLOW="$(tput setaf 3)"
+BLUE="$(tput setaf 123)"
+ENDCOLOR="$(tput setaf 7)"
+
+echo "This is ${GREEN}Green ${ENDCOLOR}Color"
+echo "This is ${RED}Red ${ENDCOLOR}Color"
+echo "This is ${YELLOW}Yellow ${ENDCOLOR}Color"
+echo "This is ${BLUE}Blue ${ENDCOLOR}Color"
