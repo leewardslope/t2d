@@ -1,26 +1,33 @@
 #! /bin/bash
 
-function funSetup()
+# Using tput will eliminate the usage of "-e" in echo, and can be used anywhere
+RED="$(tput setaf 1)" # ${RED}
+GREEN="$(tput setaf 2)" # ${GREEN}
+YELLOW="$(tput setaf 3)" # ${YELLOW}
+BLUE="$(tput setaf 123)" # ${BLUE}
+END="$(tput setaf 7)" # ${END}
+
+function funSetup() # Added Color
 {
     cf=$1
     carry=$2
     iam=funSetup
     clear
-    echo "What type of setup do you prefer?"
-    echo ""
-    select start in "Step by Step Setup" "Advanced Setup" "Back"
+    echo "${YELLOW}What type of setup do you prefer?${END}"
+    echo "${BLUE}"
+    select start in "Step by Step Setup" "Advanced Setup" "Back"${END}
     do
         case $start in
         "Step by Step Setup")
-            echo "step by step selected"
+            # echo "step by step selected"
             funSBS $iam $carry ;;
         "Advanced Setup")
-            echo "advanced setup selected"
+            # echo "advanced setup selected"
             funAdv $iam $carry ;;
         Back)
             $cf $iam $carry ;;
         *)
-            echo "Please choose the correct option" ;;
+            echo "${RED}Please choose the correct option${END}" ;;
         esac
     done
 }
@@ -46,15 +53,15 @@ function funBack()
     done
 }
 
-function funSBS()
+function funSBS() # Added Color
 {
     cf=$1
     carry=$2
     clear
-    echo "You are in Step by Step App Creation, Follow along!"
-    echo ""
+    echo "${YELLOW}You are in Step by Step App Creation,${END}${RED} Follow along!${END}"
+    echo "${BLUE}"
     iam=funSBS
-    select sbs in "Automatic" "Skip To" "Back" 
+    select sbs in "Automatic" "Skip To" "Back"${END}
     do
         case $sbs in 
         "Automatic")
@@ -62,11 +69,11 @@ function funSBS()
             
         "Skip To")
             clear
-            echo "Skip to a Particular Section"
+            echo "${YELLOW}Skip to a Particular Section${END}"
             echo ""
-            echo "Redirecting to Advanced setup!!!"
-            echo ""
-            select skip in "Apps" "Plugins" "Database" "BuildPacks" "Others" "Back"
+            echo "${RED}Redirecting to Advanced setup!!!${END}"
+            echo "${BLUE}"
+            select skip in "Apps" "Plugins" "Database" "BuildPacks" "Others" "Back"${END}
             do 
                 case $skip in
                 "Apps")
@@ -82,27 +89,14 @@ function funSBS()
                 "Back")
                     funBack $iam $carry ;;
                 *)
-                    echo "Press Enter For available Options" ;;
+                    echo "${RED}Press Enter For available Options${END}" ;;
                 esac
             done ;;
         
         Back)
-            clear
-            echo "Where do you want to Jump"
-            echo ""
-            select back in "Intro" "Choose the type of Setup"
-            do 
-                case $back in
-                "Intro")
-                    funIntro $iam $carry ;;
-                "Choose the type of Setup")
-                    funSetup $iam $carry ;;
-                *)
-                    echo "Press Enter For available Options" ;;
-                esac
-            done ;;
+            funBack $iam $carry;;
         *)
-            echo "Press Enter For available Options" ;;
+            echo "${RED}Press Enter For available Options"${END} ;;
         esac
     done
 }
@@ -138,13 +132,13 @@ function funAdv()
     done
 }
 
-function funIntro()
+function funIntro() #Added Color
 {
     cf=$1
     carry=$2
     clear
     iam="funIntro"
-    echo "..........Please read this carefull before Moving Forward..........."
+    echo "${BLUE}..........Please read this carefull before Moving Forward...........${END}"
     echo ""
     cat << foremIntro
     Presently this script offers "Two Importtant Fucntions".
@@ -155,24 +149,21 @@ function funIntro()
 
     => The Automatic script is written keeping beginners in mind, 
        So every Automatic Script works like an Q & A session. 
-       At the start of Automatic script you can see a prompt of all the Questions.
-       Assuring that you know all the answers will make it easy to install.
+       At the start of Automatic script you can see a prompt of prerequisites.
+       Assuring that you know all prerequsites will make it easy to install.
 
 foremIntro
-    echo "..........................End of Intro................................"
-    
-    # update, checking 
-    # I might add some menu
-    
-    echo "Press any key to continue..."
+    echo "${BLUE}..........................End of Intro................................${END}"
+    echo ""
+    echo "${YELLOW}Press any key to continue...${END}"
     while [ true ]
     do
-        read -t 10 -n 1 # reminds once eevry 3 seconds
-    if [ $? = 0 ] # pressing any key will trigger this if loop within while loop
+        read -r -t 10 -n 1 # reminds once in every 10 seconds
+    if [ $? = 0 ] # pressing any key will trigger this then statement
     then 
-        funSetup $iam $carry
+        funSetup $iam $carry # Changing function
     else
-        echo "waiting for the response!!!"  # As there is no response, the else part of the if loop is activate in while 
+        echo "${RED}waiting for the response!!!${END}"  # As there is no response, the else part of the if loop is activate in while 
     fi
     done
 }
