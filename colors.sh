@@ -1,14 +1,14 @@
 #! /bin/bash
 
-# Using tput will eliminate the usage of "-e" in echo, and can be used anywhere
+# Using "tput" will eliminate the usage of "-e" in echo, and can be used anywhere
 
-RED="$(tput setaf 1)"
-GREEN="$(tput setaf 2)"
-YELLOW="$(tput setaf 3)"
-BLUE="$(tput setaf 123)"
-ENDCOLOR="$(tput setaf 7)"
+RED="$(tput setaf 1)" # ${RED}
+GREEN="$(tput setaf 2)" # ${GREEN}
+YELLOW="$(tput setaf 3)" # ${YELLOW}
+BLUE="$(tput setaf 123)" # ${BLUE}
+END="$(tput setaf 7)" # ${END}
 
-echo "This is ${GREEN}Green ${ENDCOLOR}Color"
-echo "This is ${RED}Red ${ENDCOLOR}Color"
-echo "This is ${YELLOW}Yellow ${ENDCOLOR}Color"
-echo "This is ${BLUE}Blue ${ENDCOLOR}Color"
+echo "This is ${GREEN}Green ${END}Color"
+echo "This is ${RED}Red ${END}Color"
+echo "This is ${YELLOW}Yellow ${END}Color"
+echo "This is ${BLUE}Blue ${END}Color"
