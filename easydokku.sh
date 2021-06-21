@@ -526,7 +526,7 @@ function funForem() # Added Color
             [Nn]* )
                 break;;
             [Mm]* )
-                echo "Will Be Updated";
+                echo "Will Be Updated";;
                 # I'm not breaking the loop; because if someone want to check this option and as it is not updated he might need to start the entire installation process
             * )
                 echo "${RED}Please answer Y or N or M.${END}";;
