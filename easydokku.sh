@@ -343,8 +343,7 @@ function funForem() # Added Color
                 echo "${YELLOW}Upgrading System${END}"
                 sudo apt -y upgrade
                 sudo apt -y autoclean
-                sudo apt -y --purge autoremove
-                &
+                sudo apt -y --purge autoremove &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
