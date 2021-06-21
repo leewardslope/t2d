@@ -98,7 +98,7 @@ function funIstallDokku() # Don't forget to retrace back properly, not configure
     done
 }
 
-function funSetup() # Added Color # New Update
+function funSetup() # Added Color # New Update v2
 {
     cf=$1
     carry=$2
@@ -115,73 +115,52 @@ function funSetup() # Added Color # New Update
     esac
 }
 
-function funBack()
+function funBack() #added color #New Update v2
 {
     cf=$1
     carry=$2
     clear
     iam=funBack
-    echo "Where do you want to Jump"
+    echo "${YELLOW}Where do you want to Jump${END}"
     echo ""
-    select back in "Intro" "Choose the type of Setup"
-    do 
-        case $back in
-        "Intro")
-            funIntro $iam $carry ;;
-        "Choose the type of Setup")
-            funSetup $iam $carry ;;
-        *)
-            echo "Press Enter For available Options";;
-        esac
-    done
+    options=("Intro" "Choose the type of Setup" "${array[@]}") # join arrays to add some variable array
+    case `select_opt "${options[@]}"` in
+        0) funIntro $iam $carry ;;
+        1) funSetup $iam $carry ;;            
+        *) echo "selected ${options[$?]}";;
+    esac
 }
 
-function funSBS() # Added Color
+function funSBS() # Added Color #New Update v2
 {
     cf=$1
     carry=$2
     clear
     echo "${YELLOW}You are in Step by Step App Creation,${END}${RED} Follow along!${END}"
-    echo "${BLUE}"
+    echo ""
     iam=funSBS
-    select sbs in "Automatic" "Skip To" "Back"${END}
-    do
-        case $sbs in 
-        "Automatic")
-            funOneway $iam $carry ;;
-            
-        "Skip To")
+    options=("Automatic" "Skip To" "Back" "${array[@]}") 
+    case `select_opt "${options[@]}"` in
+        0) funOneway $iam $carry ;;
+        1) 
             clear
             echo "${YELLOW}Skip to a Particular Section${END}"
             echo ""
             echo "${RED}Redirecting to Advanced setup!!!${END}"
-            echo "${BLUE}"
-            select skip in "Apps" "Plugins" "Database" "BuildPacks" "Others" "Back"${END}
-            do 
-                case $skip in
-                "Apps")
-                    funApps $iam $carry ;;
-                "Plugins")
-                    funPlugins $iam $carry ;;
-                "Database")
-                    funDatabase $iam $carry ;;
-                "BuildPacks")
-                    funBuildpacks $iam $carry ;;
-                "Others")
-                    funOthers $iam $carry ;;
-                "Back")
-                    funBack $iam $carry ;;
-                *)
-                    echo "${RED}Press Enter For available Options${END}" ;;
-                esac
-            done ;;
-        
-        Back)
-            funBack $iam $carry;;
-        *)
-            echo "${RED}Press Enter For available Options"${END} ;;
-        esac
-    done
+            echo ""
+            options=("Apps" "Plugins" "Database" "BuildPacks" "Others" "Back" "${array[@]}")
+            case `select_opt "${options[@]}"` in
+                0) funApps $iam $carry ;;
+                1) funPlugins $iam $carry ;;
+                2) funDatabase $iam $carry ;;
+                3) funBuildpacks $iam $carry ;;
+                4) funOthers $iam $carry ;;
+                5) funBack $iam $carry ;;         
+                *) echo "selected ${options[$?]}";;
+            esac ;;
+        2) funBack $iam $carry ;;            
+        *) echo "selected ${options[$?]}";;
+    esac
 }
 
 function funAdv()
@@ -736,28 +715,19 @@ function funOneway()
     cf=$1
     carry=1
     iam=funOneway
-    echo "For now we have only one pre-configured app: Forem"
+    clear
+    echo "${YELLOW}For now we have only one pre-configured app: ${GREEN}Forem${END}"
     echo ""
-    select skip in "Forem" "Wordpress" "Ghost" "OpenVPN" "Commento" "Back"
-    do 
-        case $skip in
-        "Forem")
-            funForem $iam $carry ;;
-        "Wordpress")
-            funWordpress $iam $carry ;;
-        "Ghost")
-            funGhost $iam $carry ;;
-        "OpenVPN")
-            funOpenVPN $iam $carry ;;
-        "Commento")
-            funCommento $iam $carry ;;
-        "Back")
-            funBack $iam $carry ;;
-        *)
-            echo "Press Enter For available Options" ;;
-        esac
-    done
-
+    options=("Forem" "Wordpress" "Ghost" "OpenVPN" "Commento" "Back" "${array[@]}") # join arrays to add some variable array
+    case `select_opt "${options[@]}"` in
+        0) funForem $iam $carry ;;
+        1) funWordpress $iam $carry ;;
+        2) funGhost $iam $carry ;;
+        3) funOpenVPN $iam $carry ;;
+        4) funCommento $iam $carry ;;
+        5) funBack $iam $carry ;;    
+        *) echo "selected ${options[$?]}";;
+    esac
 }
 
 function funAddENV() # A small script to manually add a ENV variables
