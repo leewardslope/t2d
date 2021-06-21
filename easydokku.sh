@@ -1,26 +1,33 @@
 #! /bin/bash
 
-function funSetup()
+# Using tput will eliminate the usage of "-e" in echo, and can be used anywhere
+RED="$(tput setaf 1)" # ${RED}
+GREEN="$(tput setaf 2)" # ${GREEN}
+YELLOW="$(tput setaf 3)" # ${YELLOW}
+BLUE="$(tput setaf 6)" # ${BLUE}
+END="$(tput setaf 7)" # ${END}
+
+function funSetup() # Added Color
 {
     cf=$1
     carry=$2
     iam=funSetup
     clear
-    echo "What type of setup do you prefer?"
-    echo ""
-    select start in "Step by Step Setup" "Advanced Setup" "Back"
+    echo "${YELLOW}What type of setup do you prefer?${END}"
+    echo "${BLUE}"
+    select start in "Step by Step Setup" "Advanced Setup" "Back"${END}
     do
         case $start in
         "Step by Step Setup")
-            echo "step by step selected"
+            # echo "step by step selected"
             funSBS $iam $carry ;;
         "Advanced Setup")
-            echo "advanced setup selected"
+            # echo "advanced setup selected"
             funAdv $iam $carry ;;
         Back)
             $cf $iam $carry ;;
         *)
-            echo "Please choose the correct option" ;;
+            echo "${RED}Please choose the correct option${END}" ;;
         esac
     done
 }
@@ -46,15 +53,15 @@ function funBack()
     done
 }
 
-function funSBS()
+function funSBS() # Added Color
 {
     cf=$1
     carry=$2
     clear
-    echo "You are in Step by Step App Creation, Follow along!"
-    echo ""
+    echo "${YELLOW}You are in Step by Step App Creation,${END}${RED} Follow along!${END}"
+    echo "${BLUE}"
     iam=funSBS
-    select sbs in "Automatic" "Skip To" "Back" 
+    select sbs in "Automatic" "Skip To" "Back"${END}
     do
         case $sbs in 
         "Automatic")
@@ -62,11 +69,11 @@ function funSBS()
             
         "Skip To")
             clear
-            echo "Skip to a Particular Section"
+            echo "${YELLOW}Skip to a Particular Section${END}"
             echo ""
-            echo "Redirecting to Advanced setup!!!"
-            echo ""
-            select skip in "Apps" "Plugins" "Database" "BuildPacks" "Others" "Back"
+            echo "${RED}Redirecting to Advanced setup!!!${END}"
+            echo "${BLUE}"
+            select skip in "Apps" "Plugins" "Database" "BuildPacks" "Others" "Back"${END}
             do 
                 case $skip in
                 "Apps")
@@ -82,27 +89,14 @@ function funSBS()
                 "Back")
                     funBack $iam $carry ;;
                 *)
-                    echo "Press Enter For available Options" ;;
+                    echo "${RED}Press Enter For available Options${END}" ;;
                 esac
             done ;;
         
         Back)
-            clear
-            echo "Where do you want to Jump"
-            echo ""
-            select back in "Intro" "Choose the type of Setup"
-            do 
-                case $back in
-                "Intro")
-                    funIntro $iam $carry ;;
-                "Choose the type of Setup")
-                    funSetup $iam $carry ;;
-                *)
-                    echo "Press Enter For available Options" ;;
-                esac
-            done ;;
+            funBack $iam $carry;;
         *)
-            echo "Press Enter For available Options" ;;
+            echo "${RED}Press Enter For available Options"${END} ;;
         esac
     done
 }
@@ -138,13 +132,13 @@ function funAdv()
     done
 }
 
-function funIntro()
+function funIntro() #Added Color
 {
     cf=$1
     carry=$2
     clear
     iam="funIntro"
-    echo "..........Please read this carefull before Moving Forward..........."
+    echo "${BLUE}..........Please read this carefull before Moving Forward...........${END}"
     echo ""
     cat << foremIntro
     Presently this script offers "Two Importtant Fucntions".
@@ -155,24 +149,21 @@ function funIntro()
 
     => The Automatic script is written keeping beginners in mind, 
        So every Automatic Script works like an Q & A session. 
-       At the start of Automatic script you can see a prompt of all the Questions.
-       Assuring that you know all the answers will make it easy to install.
+       At the start of Automatic script you can see a prompt of prerequisites.
+       Assuring that you know all prerequsites will make it easy to install.
 
 foremIntro
-    echo "..........................End of Intro................................"
-    
-    # update, checking 
-    # I might add some menu
-    
-    echo "Press any key to continue..."
+    echo "${BLUE}..........................End of Intro................................${END}"
+    echo ""
+    echo "${YELLOW}Press any key to continue...${END}"
     while [ true ]
     do
-        read -t 10 -n 1 # reminds once eevry 3 seconds
-    if [ $? = 0 ] # pressing any key will trigger this if loop within while loop
+        read -r -t 10 -n 1 # reminds once in every 10 seconds
+    if [ $? = 0 ] # pressing any key will trigger this then statement
     then 
-        funSetup $iam $carry
+        funSetup $iam $carry # Changing function
     else
-        echo "waiting for the response!!!"  # As there is no response, the else part of the if loop is activate in while 
+        echo "${RED}waiting for the response!!!${END}"  # As there is no response, the else part of the if loop is activate in while 
     fi
     done
 }
@@ -332,20 +323,27 @@ function funEnv()
     dokku config:set $app_name --no-restart APP_DOMAIN=$APP_DOMAIN
 }
 
-function funForem()
+function funForem() # Added Color
 {
     cf=$1
     carry=$2
     iam=funForem
-    echo "This is Forem Automatic Setup"
-
+    echo "${YELLOW}This is Forem Automatic Setup${END}"
+    echo ""
     while true; do
-        read -r -p "Do you wish to Update the System? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish to Update the System?${END} (Y/N): " answer
         case $answer in
-            [Yy]* ) 
+            [Yy]* )
+                echo "${YELLOW}Updating System${END}"
+                sudo dpkg --configure -a
+                sudo apt -y --purge autoremove
+                sudo apt install -f
                 sudo apt -y update
                 wait
-                sudo apt -y upgrade &
+                echo "${YELLOW}Upgrading System${END}"
+                sudo apt -y upgrade
+                sudo apt -y autoclean
+                sudo apt -y --purge autoremove &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
@@ -353,15 +351,15 @@ function funForem()
             [Nn]* ) 
                 break;;
             * ) 
-                echo "Please answer Y or N.";;
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
- 
     
     while true; do
-        read -r -p "Do you wish to Update the Dokku? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish to Update the Dokku?${END} (Y/N): " answer
         case $answer in
-            [Yy]* ) 
+            [Yy]* )
+                echo "${YELLOW}Upgrading Dokku${END}"
                 sudo apt-get -y update -qq
                 wait
                 sudo apt-get -qq -y --no-install-recommends install dokku herokuish sshcommand plugn gliderlabs-sigil dokku-update dokku-event-listener
@@ -371,188 +369,235 @@ function funForem()
                 wait $process_id
                 echo "Exit status: $?"; 
                 break;;
-            [Nn]* ) 
+            [Nn]* )
                 break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
+    done
+
+    echo "${BLUE}Please Make Sure you have these Pre Requisites${END}"
+    echo ""
+    cat << foremIntro
+    In order for you to have a successful Forem Installaton;
+    
+    1. Point you DNS to the IP address of this server. (A Record)
+    2. You need to Fetch the below mentioned ENV Variables:
+        APP_DOMAIN (app.example.com)
+        APP_PROTOCOL (https://)
+        COMMUNITY_NAME
+        FOREM_OWNER_SECRET (don't forget this)
+        HONEYBADGER_API_KEY (to create one: https://www.honeybadger.io/)
+        HONEYBADGER_JS_API_KEY (same as HONEYBADGER_API_KEY)
+        AWS_ID 
+        AWS_SECRET
+        AWS_BUCKET_NAME (s3 bucket name)
+        AWS_UPLOAD_REGION (Preferable to create a bucket in your server region)
+    3. Other ENV variables will be configured by the t2d(Talk to Dokku) script.
+
+foremIntro
+
+    echo "Once you have all the ENV Variables;${YELLOW} Press any key to continue...${END}"
+    while [ true ]
+    do
+        read -r -t 10 -n 1 # reminds once in every 10 seconds
+    if [ $? = 0 ] # pressing any key will trigger this then statement
+    then 
+        break # Changing function
+    else
+        echo "${GREEN}It's good that you are fetching your ENV Variables${END}"  # As there is no response, the else part of the if loop is activate in while 
+    fi
     done
     
     while true; do
-        read -r -p "Do you wish create a New App? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish create a New App?${END} (Y/N): " answer
         case $answer in
-            [Yy]* ) 
-                echo "Creating an app named aforem"
+            [Yy]* )
+                echo "${YELLOW}Creating an app named nforem${END}"
                 echo "stopping all previously automatically created Forems"
+                echo "${GREEN}No need to worry if you find something like Error!${END}"
                 dokku ps:stop nforem
                 wait
                 echo "Destroying all previously created Forems except 1"
+                echo "${GREEN}No need to worry if you find something like Error!${END}"
                 dokku apps:destroy oforem
                 wait
                 echo "Creating a new nforemENV.txt"
                 echo "List of Automatically created ENV variables" >> nforemENV.txt
                 echo "Saving one old forem with name oforem"
+                echo "${GREEN}No need to worry if you find something like Error!${END}"
                 dokku apps:rename nforem oforem
                 wait
                 echo "Creating our new Forem with name nforem"
-                dokku apps:create nforem &
-                process_id=$!
-                echo "PID: $process_id"
-                wait $process_id
-                echo "Exit status: $?"; 
+                dokku apps:create nforem
+                echo ""; 
                 break;;
-            [Nn]* ) 
+            [Nn]* )
                 break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
     
     while true; do
-        read -r -p "Do you wish to Add Necessary Plugins? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish to Add Necessary Plugins?${END} (Y/N): " answer
         case $answer in
-            [Yy]* ) 
+            [Yy]* )
+                echo "${YELLOW}Installing Postgress Plugin${END}"
                 sudo dokku plugin:install https://github.com/dokku/dokku-postgres.git
                 wait
-                sudo dokku plugin:install https://github.com/dokku/dokku-redis
+                echo "${YELLOW}Installing Redis Plugin${END}"
+                sudo dokku plugin:install https://github.com/dokku/dokku-redis.git
                 wait
+                echo "${YELLOW}Installing LetsEncrypt Plugin${END}"
                 sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
                 break;;
-            [Nn]* ) 
+            [Nn]* )
                 break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
     
     while true; do
-        read -r -p "Do you wish to create New Databases? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish to create New Databases?${END} (Y/N): " answer
         case $answer in
-            [Yy]* ) 
+            [Yy]* )
+                echo "${YELLOW}Creating Postgresdb${END}"
                 dokku postgres:create foremdb
                 wait
+                echo "${YELLOW}Creating Redisdb${END}"
                 dokku redis:create redisdb
                 wait
+                echo "${YELLOW}Linking Postgresdb${END}"
                 dokku postgres:link foremdb nforem
                 wait
+                echo "${YELLOW}Linking Redisdb${END}"
                 dokku redis:link redisdb nforem &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
                 break;;
-            [Nn]* ) 
+            [Nn]* )
                 break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
     
     while true; do
-        read -r -p "Do you wish to Add necessary Buildpacks? (Y/N): " answer
-        case $answer in
-            [Yy]* ) 
-                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-nodejs.git
-                wait
-                dokku buildpacks:add nforem https://github.com/gaffneyc/heroku-buildpack-jemalloc
-                wait
-                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-pgbouncer.git
-                wait
-                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-ruby.git
-                process_id=$!n
-                wait $process_id
-                echo "Exit status: $?"; 
-                break;;
-            [Nn]* ) 
-                break;;
-            * ) 
-                echo "Please answer Y or N.";;
-        esac
-    done
-    
-    while true; do
-        read -r -p "Do you wish to Optimise your Forem? (Y/N): " answer
-        case $answer in
-            [Yy]* ) 
-                dokku ps:scale nforem web=1 sidekiq_worker=1
-                wait
-                dokku resource:limit --memory 512m --process-type web nforem
-                wait
-                dokku resource:limit --memory 512m --process-type sidekiq_worker nforem
-                wait
-                dokku config:set nforem --no-restart MALLOC_ARENA_MAX=2 JEMALLOC_ENABLED=true WEB_CONCURRENCY=2 RUBY_GC_HEAP_GROWTH_FACTOR=1.03 PGBOUNCER_PREPARED_STATEMENTS=false DATABASE_POOL_SIZE=5 RAILS_MAX_THREADS=5 
-                wait
-                echo "Making Forem Production Ready..."
-                dokku config:set nforem --no-restart NODE_ENV=production RACK_ENV=production RACK_ENV=production SECRET_KEY_BASE=63e667bd35d7f7045e00de11cf9e115e67a560fac03a6be056c3e4e07bd6b7c974bee249c29abd794ab18c9bf661bce861945dafa31275f409ca0a82a3cae0ab
-                wait
-                dokku git:initialize nforem
-                process_id=$!
-                wait $process_id
-                echo "Exit status: $?"; 
-                break;;
-            [Nn]* ) 
-                break;;
-            * ) 
-                echo "Please answer Y or N.";;
-        esac
-    done
-    
-    while true; do
-        echo "Y for Yes, N for NO, M for Manual"
-        read -r -p "Do you wish Add/Update ENV Variables? (Y/N/M): " answer
+        read -r -p "${BLUE}Do you wish to Add necessary Buildpacks?${END} (Y/N): " answer
         case $answer in
             [Yy]* )
-
-                for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET HONEYBADGER_API_KEY HONEYBADGER_JS_API_KEY AWS_ID AWS_SECRET AWS_BUCKET_NAME AWS_UPLOAD_REGION
-                do
-                    read -r -p "$ENV = " ENV_VALUE
-                    dokku config:set nforem --no-restart $ENV=$ENV_VALUE
-                    wait
-                    echo "$ENV=$ENV_VALUE" >> nforemENV.txt
-                done
-                process_id=$!
-                wait $process_id
-                echo "Exit status: $?";
+                echo "${YELLOW}Adding NodeJS BuildPack${END}"
+                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-nodejs.git
+                wait
+                echo "${YELLOW}Adding JEMalloc Buildpack${END}"
+                dokku buildpacks:add nforem https://github.com/gaffneyc/heroku-buildpack-jemalloc
+                wait
+                echo "${YELLOW}Adding PGBouncer Buildpack${END}"
+                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-pgbouncer.git
+                wait
+                echo "${YELLOW}Adding Ruby Buildpack${END}"
+                dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-ruby.git
+                echo ""; 
                 break;;
             [Nn]* )
                 break;;
-            [Mm]* ) 
-                echo "Will Be Updated";
-                break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
     
     while true; do
-        read -r -p "Do you wish to add SSL? (Y/N): " answer
+        read -r -p "${BLUE}Do you wish to Optimise your Forem?${END} (Y/N): " answer
         case $answer in
             [Yy]* )
-                echo "Let's Encrypt Need to access your Domain and Email, so provide them for free SSL"
-                read -r -p "Domain Name: " DOMAIN
-                read -r -p "Email-ID: " EMAIL
+                echo "${YELLOW}Scaling${END}"
+                dokku ps:scale nforem web=1 sidekiq_worker=1
+                wait
+                echo "${YELLOW}Limiting Webworker Memory to 512M${END}"
+                dokku resource:limit --memory 512m --process-type web nforem
+                wait
+                echo "${YELLOW}Limiting Sidekiq Memory to 512M${END}"
+                dokku resource:limit --memory 512m --process-type sidekiq_worker nforem
+                wait
+                echo "${YELLOW}Setting up Optimisation ENV Variables${END}"
+                dokku config:set nforem --no-restart MALLOC_ARENA_MAX=2 JEMALLOC_ENABLED=true WEB_CONCURRENCY=2 RUBY_GC_HEAP_GROWTH_FACTOR=1.03 PGBOUNCER_PREPARED_STATEMENTS=false DATABASE_POOL_SIZE=5 RAILS_MAX_THREADS=5 
+                wait
+                echo "${YELLOW}Making Forem Production Ready...${END}"
+                dokku config:set nforem --no-restart NODE_ENV=production RACK_ENV=production RACK_ENV=production SECRET_KEY_BASE=63e667bd35d7f7045e00de11cf9e115e67a560fac03a6be056c3e4e07bd6b7c974bee249c29abd794ab18c9bf661bce861945dafa31275f409ca0a82a3cae0ab
+                wait
+                echo "${YELLOW}Initializing git${END}"
+                dokku git:initialize nforem
+                echo ""; 
+                break;;
+            [Nn]* )
+                break;;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
+        esac
+    done
+    
+    while IFS= true; do # "IFS="" helps me capture spaces in ENV variables, will be helpful in some COMMUNITY_NAME
+        echo "${RED}Y => Yes, N => NO, M => Manual${END}"
+        read -r -p "${BLUE}Do you wish Add/Update ENV Variables?${END} (Y/N/M): " answer
+        case $answer in
+            [Yy]* )
+                echo "${YELLOW}Make sure every thing is correct${END}"
+                for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET HONEYBADGER_API_KEY HONEYBADGER_JS_API_KEY AWS_ID AWS_SECRET AWS_BUCKET_NAME AWS_UPLOAD_REGION
+                do
+                    read -r -p "$ENV = " ENV_VALUE
+                    dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
+                    wait
+                    echo "$ENV=$ENV_VALUE" >> nforemENV.txt
+                done
+                echo "${GREEN}You can check the list of ENV variables in nfoemENV.txt${END}"
+                sleep 3;
+                break;;
+            [Nn]* )
+                break;;
+            [Mm]* )
+                echo "Will Be Updated";;
+                # I'm not breaking the loop; because if someone want to check this option and as it is not updated he might need to start the entire installation process
+            * )
+                echo "${RED}Please answer Y or N or M.${END}";;
+        esac
+    done
+    
+    while true; do
+        read -r -p "${BLUE}Do you wish to add SSL?${END} (Y/N): " answer
+        case $answer in
+            [Yy]* )
+                echo "${YELLOW}Let's Encrypt Need to access your ${RED}Domain${END} and ${RED}Email${END}, so provide them for free SSL"
+                sleep 4
+                read -r -p "${BLUE}Domain Name:${END} " DOMAIN
+                read -r -p "${BLUE}Email-ID: ${END}" EMAIL
+                echo ""
+                echo "${YELLOW}Assigning a Free SSL Certificate${END}"
                 dokku domains:set nforem $DOMAIN
                 wait
                 dokku config:set nforem DOKKU_LETSENCRYPT_EMAIL=$EMAIL
                 wait
-                dokku letsencrypt:enable nforem
+                dokku letsencrypt:enable nforem &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
                 break;;
-            [Nn]* ) 
+            [Nn]* )
                 break;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
 
     while true; do
-        read -r -p "Clone Repository and Build Forem:(Y/N) " answer
+        read -r -p "${BLUE}Clone Repository and Build Forem:${END}(Y/N) " answer
         case $answer in
-            [Yy]* ) 
+            [Yy]* )
                 dokku git:allow-host github.com
                 wait
                 dokku git:set nforem deploy-branch main
@@ -561,12 +606,12 @@ function funForem()
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?";
-                echo "There you go :), Leave a like if you successfully configured your Forem" 
+                echo "${GREEN}There you go :), Leave a like if you successfully configured your Forem${END}" 
                 exit;;
-            [Nn]* ) 
+            [Nn]* )
                 exit;;
-            * ) 
-                echo "Please answer Y or N.";;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
         esac
     done
 }
