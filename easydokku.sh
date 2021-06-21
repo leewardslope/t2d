@@ -97,6 +97,7 @@ function funIstallDokku() # Don't forget to retrace back properly, not configure
         esac
     done
 }
+
 function funSetup() # Added Color # New Update
 {
     cf=$1
