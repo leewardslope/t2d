@@ -5,7 +5,7 @@
 RED="$(tput setaf 1)" # ${RED}
 GREEN="$(tput setaf 2)" # ${GREEN}
 YELLOW="$(tput setaf 3)" # ${YELLOW}
-BLUE="$(tput setaf 123)" # ${BLUE}
+BLUE="$(tput setaf 6)" # ${BLUE}
 END="$(tput setaf 7)" # ${END}
 
 echo "This is ${GREEN}Green ${END}Color"

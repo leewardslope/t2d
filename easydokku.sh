@@ -4,7 +4,7 @@
 RED="$(tput setaf 1)" # ${RED}
 GREEN="$(tput setaf 2)" # ${GREEN}
 YELLOW="$(tput setaf 3)" # ${YELLOW}
-BLUE="$(tput setaf 123)" # ${BLUE}
+BLUE="$(tput setaf 6)" # ${BLUE}
 END="$(tput setaf 7)" # ${END}
 
 function funSetup() # Added Color
@@ -335,10 +335,16 @@ function funForem() # Added Color
         case $answer in
             [Yy]* )
                 echo "${YELLOW}Updating System${END}"
+                sudo dpkg --configure -a
+                sudo apt -y --purge autoremove
+                sudo apt install -f
                 sudo apt -y update
                 wait
                 echo "${YELLOW}Upgrading System${END}"
-                sudo apt -y upgrade &
+                sudo apt -y upgrade
+                sudo apt -y autoclean
+                sudo apt -y --purge autoremove
+                &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
