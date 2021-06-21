@@ -7,11 +7,76 @@ YELLOW="$(tput setaf 3)" # ${YELLOW}
 BLUE="$(tput setaf 123)" # ${BLUE}
 END="$(tput setaf 7)" # ${END}
 
-function funForem()
+function select_option {
+
+    # little helpers for terminal print control and key input
+    ESC=$( printf "\033")
+    cursor_blink_on()  { printf "$ESC[?25h"; }
+    cursor_blink_off() { printf "$ESC[?25l"; }
+    cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
+    print_option()     { printf "   $1 "; }
+    print_selected()   { printf "  $ESC[7m $1 $ESC[27m"; }
+    get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
+    key_input()        { read -s -n3 key 2>/dev/null >&2
+                         if [[ $key = $ESC[A ]]; then echo up;    fi
+                         if [[ $key = $ESC[B ]]; then echo down;  fi
+                         if [[ $key = ""     ]]; then echo enter; fi; }
+
+    # initially print empty new lines (scroll down if at bottom of screen)
+    for opt; do printf "\n"; done
+
+    # determine current screen position for overwriting the options
+    local lastrow=`get_cursor_row`
+    local startrow=$(($lastrow - $#))
+
+    # ensure cursor and input echoing back on upon a ctrl+c during read -s
+    trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
+    cursor_blink_off
+
+    local selected=0
+    while true; do
+        # print options by overwriting the last lines
+        local idx=0
+        for opt; do
+            cursor_to $(($startrow + $idx))
+            if [ $idx -eq $selected ]; then
+                print_selected "$opt"
+            else
+                print_option "$opt"
+            fi
+            ((idx++))
+        done
+
+        # user key control
+        case `key_input` in
+            enter) break;;
+            up)    ((selected--));
+                   if [ $selected -lt 0 ]; then selected=$(($# - 1)); fi;;
+            down)  ((selected++));
+                   if [ $selected -ge $# ]; then selected=0; fi;;
+        esac
+    done
+
+    # cursor position back to normal
+    cursor_to $lastrow
+    printf "\n"
+    cursor_blink_on
+
+    return $selected
+}
+
+function select_opt {
+    select_option "$@" 1>&2
+    local result=$?
+    echo $result
+    return $result
+}
+function funForem() # Added Color
 {
     cf=$1
     carry=$2
     iam=funForem
+    clear
     echo "${YELLOW}This is Forem Automatic Setup${END}"
     echo ""
     while true; do
@@ -19,10 +84,15 @@ function funForem()
         case $answer in
             [Yy]* )
                 echo "${YELLOW}Updating System${END}"
+                sudo dpkg --configure -a
+                sudo apt -y --purge autoremove
+                sudo apt install -f
                 sudo apt -y update
                 wait
                 echo "${YELLOW}Upgrading System${END}"
-                sudo apt -y upgrade &
+                sudo apt -y upgrade
+                sudo apt -y autoclean
+                sudo apt -y --purge autoremove &
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?"; 
@@ -53,6 +123,39 @@ function funForem()
             * )
                 echo "${RED}Please answer Y or N.${END}";;
         esac
+    done
+
+    echo "${BLUE}Please Make Sure you have these Pre Requisites${END}"
+    echo ""
+    cat << foremIntro
+    In order for you to have a successful Forem Installaton;
+    
+    1. Point you DNS to the IP address of this server. (A Record)
+    2. You need to Fetch the below mentioned ENV Variables:
+        APP_DOMAIN (app.example.com)
+        APP_PROTOCOL (https://)
+        COMMUNITY_NAME
+        FOREM_OWNER_SECRET (don't forget this)
+        HONEYBADGER_API_KEY (to create one: https://www.honeybadger.io/)
+        HONEYBADGER_JS_API_KEY (same as HONEYBADGER_API_KEY)
+        AWS_ID 
+        AWS_SECRET
+        AWS_BUCKET_NAME (s3 bucket name)
+        AWS_UPLOAD_REGION (Preferable to create a bucket in your server region)
+    3. Other ENV variables will be configured by the t2d(Talk to Dokku) script.
+
+foremIntro
+
+    echo "Once you have all the ENV Variables;${YELLOW} Press any key to continue...${END}"
+    while [ true ]
+    do
+        read -r -t 10 -n 1 # reminds once in every 10 seconds
+    if [ $? = 0 ] # pressing any key will trigger this then statement
+    then 
+        break # Changing function
+    else
+        echo "${GREEN}It's good that you are fetching your ENV Variables${END}"  # As there is no response, the else part of the if loop is activate in while 
+    fi
     done
     
     while true; do
@@ -149,9 +252,7 @@ function funForem()
                 wait
                 echo "${YELLOW}Adding Ruby Buildpack${END}"
                 dokku buildpacks:add nforem https://github.com/heroku/heroku-buildpack-ruby.git
-                process_id=$!n
-                wait $process_id
-                echo "Exit status: $?"; 
+                echo ""; 
                 break;;
             [Nn]* )
                 break;;
@@ -181,9 +282,7 @@ function funForem()
                 wait
                 echo "${YELLOW}Initializing git${END}"
                 dokku git:initialize nforem
-                process_id=$!
-                wait $process_id
-                echo "Exit status: $?"; 
+                echo ""; 
                 break;;
             [Nn]* )
                 break;;
@@ -192,8 +291,8 @@ function funForem()
         esac
     done
     
-    while true; do
-        echo "Y => Yes, N => NO, M => Manual"
+    while IFS= true; do # "IFS="" helps me capture spaces in ENV variables, will be helpful in some COMMUNITY_NAME
+        echo "${RED}Y => Yes, N => NO, M => Manual${END}"
         read -r -p "${BLUE}Do you wish Add/Update ENV Variables?${END} (Y/N/M): " answer
         case $answer in
             [Yy]* )
@@ -201,16 +300,17 @@ function funForem()
                 for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET HONEYBADGER_API_KEY HONEYBADGER_JS_API_KEY AWS_ID AWS_SECRET AWS_BUCKET_NAME AWS_UPLOAD_REGION
                 do
                     read -r -p "$ENV = " ENV_VALUE
-                    dokku config:set nforem --no-restart $ENV=$ENV_VALUE
+                    dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
                     wait
                     echo "$ENV=$ENV_VALUE" >> nforemENV.txt
                 done
-                echo "";
+                echo "${GREEN}You can check the list of ENV variables in nfoemENV.txt${END}"
+                sleep 3;
                 break;;
             [Nn]* )
                 break;;
             [Mm]* )
-                echo "Will Be Updated";
+                echo "Will Be Updated";;
                 # I'm not breaking the loop; because if someone want to check this option and as it is not updated he might need to start the entire installation process
             * )
                 echo "${RED}Please answer Y or N or M.${END}";;

@@ -72,29 +72,46 @@ function select_opt {
     return $result
 }
 
-function funSetup() # Added Color
+function funIstallDokku() # Don't forget to retrace back properly, not configured yet
+{
+    while true; 
+        do
+        # array=("Manual" "Something Else")
+        echo "${BLUE}Do you want to Install Dokku?${END}"
+        echo ""
+        options=("Yes" "No" "${array[@]}") # join arrays to add some variable array
+        case `select_opt "${options[@]}"` in
+            0)
+                echo "${YELLOW}Downloading Dokku from its Official Repository${END}"
+                wget https://raw.githubusercontent.com/dokku/dokku/v0.24.10/bootstrap.sh
+                wait
+                sudo DOKKU_TAG=v0.24.10 bash bootstrap.sh &
+                process_id=$!
+                wait $process_id
+                echo "Exit status: $?";
+                break;;
+            1) 
+                break ;;
+            *) 
+                echo "selected ${options[$?]}";;
+        esac
+    done
+}
+function funSetup() # Added Color # New Update
 {
     cf=$1
     carry=$2
     iam=funSetup
     clear
     echo "${YELLOW}What type of setup do you prefer?${END}"
-    echo "${BLUE}"
-    select start in "Step by Step Setup" "Advanced Setup" "Back"${END}
-    do
-        case $start in
-        "Step by Step Setup")
-            # echo "step by step selected"
-            funSBS $iam $carry ;;
-        "Advanced Setup")
-            # echo "advanced setup selected"
-            funAdv $iam $carry ;;
-        Back)
-            $cf $iam $carry ;;
-        *)
-            echo "${RED}Please choose the correct option${END}" ;;
-        esac
-    done
+    echo ""
+    options=("Step by Step Setup" "Advanced Setup" "Back" "${array[@]}") # join arrays to add some variable array
+    case `select_opt "${options[@]}"` in
+        0) funSBS $iam $carry ;;
+        1) funAdv $iam $carry ;;
+        2) $cf $iam $carry ;;            
+        *) echo "selected ${options[$?]}";;
+    esac
 }
 
 function funBack()
