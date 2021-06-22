@@ -89,9 +89,8 @@ function funIstallDokku() # Don't forget to retrace back properly, not configure
                 process_id=$!
                 wait $process_id
                 echo "Exit status: $?";
-                break;;
             1) 
-                break ;;
+                echo "Skipping manual dokku update checks"
             *) 
                 echo "selected ${options[$?]}";;
         esac
