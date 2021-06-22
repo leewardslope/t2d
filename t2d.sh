@@ -129,4 +129,5 @@ case `select_opt "${options[@]}"` in
     *) echo "selected ${options[$?]}";;
 esac
 
+chmod +x easydokku.sh
 ./easydokku.sh

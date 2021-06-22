@@ -88,9 +88,9 @@ function funIstallDokku() # Don't forget to retrace back properly, not configure
                 sudo DOKKU_TAG=v0.24.10 bash bootstrap.sh &
                 process_id=$!
                 wait $process_id
-                echo "Exit status: $?";
+                echo "Exit status: $?";;
             1) 
-                echo "Skipping manual dokku update checks"
+                echo "Skipping manual dokku update checks";;
             *) 
                 echo "selected ${options[$?]}";;
         esac
