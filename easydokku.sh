@@ -237,7 +237,7 @@ function funApps()
     clear
     echo "App Configuration Menu"
     echo ""
-    if [ $carry -eq 1 ] 
+    if [ $carry -eq 1 ] # Forem Automatic Setup
     then
         echo "Automatic Setup"
         dokku apps:create forem # 01: creating app
@@ -384,7 +384,7 @@ function funEnv()
     dokku config:set $app_name --no-restart APP_DOMAIN=$APP_DOMAIN
 }
 
-function funForem() # Added Color
+function funForem() # Added Color # Manual ENV varibales
 {
     cf=$1
     carry=$2
@@ -622,8 +622,25 @@ foremIntro
             [Nn]* )
                 break;;
             [Mm]* )
-                echo "Will Be Updated";;
-                # I'm not breaking the loop; because if someone want to check this option and as it is not updated he might need to start the entire installation process
+                while true; do
+                    read -r -p "${YELLOW}    Do you wish to manually add a new ENV varibale?${END} (Y/N): " answer
+                    case $answer in
+                        [Yy]* )
+                                read -r -p "${GREEN}    Name of ENV Varibale:${END} " ENV 
+                                read -r -p "${GREEN}    Value of $ENV =${END} " ENV_VALUE
+                                # dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
+                                echo "    $ENV=$ENV_VALUE"
+                                wait
+                                echo "$ENV=$ENV_VALUE" >> nforemENV.txt ;;
+                        [Nn]* )
+                            echo "${YELLOW}    I hope you finished adding all your ENV varibales${END}"
+                            echo "${RED}    Exited... Manual ENV Varibale Setup${END}"
+                            break;;
+                        * )
+                            echo "${RED}Please answer Y or N.${END}";;
+                    esac
+                done
+                break;;
             * )
                 echo "${RED}Please answer Y or N or M.${END}";;
         esac
@@ -731,9 +748,9 @@ function funOneway()
 
 function funAddENV() # A small script to manually add a ENV variables
 {
-    read -r -p "ENV Varibale: " ENV 
-    read -r -p "$ENV = " ENV_Value
-    echo "$ENV=$ENV_Value" 
+    read -r -p "Name of ENV Varibale: " ENV 
+    read -r -p "Value of $ENV = " ENV_VALUE
+    echo "$ENV=$ENV_VALUE" 
 }
 
 funIntro dokku
