@@ -628,8 +628,8 @@ foremIntro
                         [Yy]* )
                                 read -r -p "${GREEN}    Name of ENV Varibale:${END} " ENV 
                                 read -r -p "${GREEN}    Value of $ENV =${END} " ENV_VALUE
-                                # dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
-                                echo "    $ENV=$ENV_VALUE"
+                                dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
+                                # echo "    $ENV=$ENV_VALUE"
                                 wait
                                 echo "$ENV=$ENV_VALUE" >> nforemENV.txt ;;
                         [Nn]* )
