@@ -202,7 +202,7 @@ function funIntro() #Added Color
     echo "${BLUE}..........Please read this carefull before Moving Forward...........${END}"
     echo ""
     cat << foremIntro
-    Presently this script offers "Two Importtant Fucntions".
+    Presently this script offers "Two Important Fucntions".
     1. Automatic (Step by Step Insatllation)
     2. Manual (Advanced)
     
