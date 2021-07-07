@@ -269,16 +269,17 @@ function funForem()
     wait
     dokku git:set nforem deploy-branch main
     wait
-    dokku git:sync --build nforem https://github.com/akhil-naidu/forem.git &
-    process_id=$!
-    wait $process_id
-    echo "Exit status: $?"
+    dokku git:sync --build nforem https://github.com/akhil-naidu/forem.git
+    wait 
     echo "${GREEN}There you go :), Leave a like if you successfully configured your Forem${END}" 
 }
 
-function funAnyapp()
+function funGhost()
 {
-    echo "Will be coming Soon"
+    cf=$1
+    carry=$2
+    iam=funGhost
+    echo "This is Ghost"
     # Pre-requisites Message
 
     # Create App
@@ -296,7 +297,6 @@ function funAnyapp()
     # Adding SSL
 
     # Clone repository and Build Forem
-
 }
 
 
