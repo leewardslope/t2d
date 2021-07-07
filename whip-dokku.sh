@@ -278,6 +278,7 @@ function funForem()
 
 function funAnyapp()
 {
+    echo "Will be coming Soon"
     # Pre-requisites Message
 
     # Create App
