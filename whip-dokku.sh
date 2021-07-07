@@ -1,12 +1,16 @@
 #! /bin/bash
 
-# This script is used to configure the essentials of t2d.
-## 1 => A small message about the script, to notify issues to the user.
-## 2 => Allowing the user to choose, "How they want to use t2d?"(Manual/Automatic).
-## 3 => Automatic Script Menu
-## 4 => Manual Script Menu
-## 5 => 
-## 6 => 
+# This script is used to configure the essentials of t2d and install insatll Forem(for now)
+## 1 => Check whether the program/application, "Whiptails" exists or not.
+## 2 => Making sure that the script is runing with root permissions.
+## 3 => Update and Upgrade the VPS.
+## 4 => Check whether the program/application, "Dokku" was Installed or not.
+## 5 => Upgrading dokku to the latest version.
+## 6 => Downloading the latest whip-dokku.sh or easydokku.sh and placing in users VPS.
+## 7 => A small message about the script, to notify issues to the user.
+## 8 => Allowing the user to choose, "How they want to use t2d?"(Manual/Automatic).
+## 9 => Automatic Script Menu
+## 10 => Manual Script Menu
 
 # Using tput will eliminate the usage of "-e" in echo, and can be used anywhere
 ## Color Palet
@@ -118,7 +122,27 @@ function funSBS()
 # Skip to a Particular Section
 ## Will be configured once all the Automatic Configurations are done.
 ## Around 5 fucntions
-
+function funENV()
+{
+    while true; do
+        read -r -p "${YELLOW}    Do you wish to manually add a new ENV varibale?${END} (Y/N): " answer
+        case $answer in
+            [Yy]* )
+                    read -r -p "${GREEN}    Name of ENV Varibale:${END} " ENV 
+                    read -r -p "${GREEN}    Value of $ENV =${END} " ENV_VALUE
+                    dokku config:set nforem --no-restart $ENV="$ENV_VALUE"
+                    wait
+                    echo "$ENV=$ENV_VALUE" ;;
+            [Nn]* )
+                echo "${YELLOW}    I hope you finished adding all your ENV varibales${END}"
+                echo "${RED}    Exited... Manual ENV Varibale Setup${END}"
+                break;;
+            * )
+                echo "${RED}Please answer Y or N.${END}";;
+        esac
+    done
+    exit
+}
 
 # Automatic
 ## User will choose his desired platform, for staters we will add only one app Forem.
@@ -130,6 +154,8 @@ function funForem()
     cf=$1
     carry=$2
     iam="funForem"
+    : ' # This is not required now.
+
     whiptail --title "Pre-Requisites" --msgbox "In order for you to have a successful Forem Installaton.\n
     1. Point you DNS to the IP address of this server. (A Record)
     2. You need to Fetch few ENV Variables, next screen and
@@ -147,7 +173,7 @@ function funForem()
         AWS_BUCKET_NAME
         AWS_UPLOAD_REGION" 20 70
     wait
-
+    '
     # Create App
     echo "${YELLOW}Creating an app named nforem${END}"
     echo "stopping all previously and automatically created Forems"
@@ -228,7 +254,8 @@ function funForem()
 
     # Add ENV Variables
     echo "${YELLOW}Make sure every thing is correct${END}"
-    for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET HONEYBADGER_API_KEY HONEYBADGER_JS_API_KEY AWS_ID AWS_SECRET AWS_BUCKET_NAME AWS_UPLOAD_REGION
+    #for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET HONEYBADGER_API_KEY HONEYBADGER_JS_API_KEY AWS_ID AWS_SECRET AWS_BUCKET_NAME AWS_UPLOAD_REGION
+    for ENV in APP_DOMAIN APP_PROTOCOL COMMUNITY_NAME FOREM_OWNER_SECRET
     do
         ENV_VALUE=$(whiptail --title "Adding ENV Variables" --inputbox "$ENV:" 10 60   3>&1 1>&2 2>&3)
         exitstatus=$?
@@ -240,6 +267,7 @@ function funForem()
             exit
         fi       
     done
+
 
     # Adding SSL
     DOMAIN=$(whiptail --title "SSL Configuration" --inputbox "Domain Name:" 10 60 3>&1 1>&2 2>&3)
