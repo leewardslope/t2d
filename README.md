@@ -27,3 +27,17 @@ and link them to any of these databases:
 - Redis.
 
 In other words, if your application can run in Heroku, it is always possible to make it up and running in Dokku; t2d stands as a medium for you to talk with dokku and configure your app, within your terminal.
+
+# Quick Start Instructions
+### Downlaod the Latest t2d Script
+```
+wget https://raw.githubusercontent.com/akhil-naidu/t2d/master/whip-dokku.sh
+```
+### Execute it in root
+```
+bash whip-dokku.sh
+```
+### Pre-requisites
+1. Preferrably Dokku configured VPS.
+2. Domain Name pointing to your VPS IP.
+3. Keep an eye at your terminal, t2d might need your assistance to move forward.
