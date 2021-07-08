@@ -137,7 +137,6 @@ function funUpdateapp()
         # Add a New Buildpack
         # Add a New Plugin
         # Other
-    rm -r test.tmp
     while [ 1 ]
     do
     CHOICE=$(
@@ -180,7 +179,10 @@ function funUpdateapp()
         "5)")
             result="Coming Soon"
         ;;
-        "9)") exit
+        "9)") 
+        echo "Going to delete this now" >> test.tmp #Prevents error, if the file doesnot exists
+        rm -r test.tmp
+        exit
         ;;
     esac
     whiptail --msgbox "$result" 10 60
@@ -289,6 +291,8 @@ function funENV()
                     wait
                     echo "$ENV=$ENV_VALUE" ;;
             [Nn]* )
+                echo "${YELLOW}Updating Changes to the app before exiting${END}"
+                dokku ps:restart $APP
                 echo "${YELLOW}    I hope you finished adding all your ENV varibales${END}"
                 echo "${RED}    Exiting... Manual ENV Varibale Setup${END}"
                 $cf $iam $carry
