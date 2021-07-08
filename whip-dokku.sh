@@ -543,7 +543,7 @@ function funCheck()
             echo "${YELLOW}Dokku Version: ${GREEN}0.24.10${END} => Skipping Dokku Update promt"
         else
             # Promt for update
-            if (whiptail --title "Updating Dokku" --yes-button "Update" --no-button "Skip"  --yesno "Would you like to update your Dokku?" 10 60) then
+            if (whiptail --title "Updating Dokku to Latest Version" --yes-button "Update" --no-button "Skip"  --yesno "Latest Dokku Version: 0.24.10\nInstalled Dokku Version: $DOKKU_VERSION" 10 60) then
                 echo "${YELLOW}You chose Update.${END}"
                 # Update Dokku
                 echo "${YELLOW}Upgrading Dokku${END}"
