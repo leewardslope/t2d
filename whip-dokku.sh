@@ -35,6 +35,9 @@ function funIntro() #Added Color
     cf=$1
     carry=$2
     iam="funIntro"
+    : '
+    # Commenting Intro as I believe it is not necessary! Will open this if I want to give any notification.
+
     whiptail --title "A small Notification" --msgbox "Presently this script offers Two Important Fucntions.\n
     1. Automatic (Step by Step Insatllation)
     2. Manual (Advanced)\n=> Advanced/Manual version is a TUI-CLI version for Dokku\n=> The Automatic script is written keeping beginners in mind,\n" 20 70
@@ -42,7 +45,146 @@ function funIntro() #Added Color
     1. At the start of Automatic script you can see a prompt of prerequisites.\n
     2. Assuring that you know all prerequsites will make it easy to install.\n" 20 70
     wait
-    funSetup $iam $carry
+    '
+    funMainmenu $iam $carry
+}
+
+# Main Menu
+## Here user will can create a new app or update his existing app.
+function funMainmenu()
+{
+    cf=$1
+    carry=$2
+    iam=funMainmenu
+    CHOICE=$(
+    whiptail --notags --title "Choose your Setup" --menu "Press Enter to confirm your choice" 10 60 2 \
+        "funSetup" " Create a New App "   \
+        "funUpdatemenu" " Update Existing App " 3>&2 2>&1 1>&3	
+    )
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+        $CHOICE $iam $carry
+    else
+        echo "You chose Cancel."
+        exit
+    fi
+}
+
+# Update Menu
+function funUpdatemenu()
+{
+    cf=$1
+    carry=$2
+    iam=funUpdatemenu
+    echo "$(dokku apps:list | grep -v "==")" > test.tmp
+    INPUT="test.tmp"
+    COUNT=$(grep "" -c $INPUT)
+    if [[ $COUNT -eq 1 ]]
+    then
+        APP=$(cat $INPUT)
+        funUpdateapp $iam $carry
+    else
+        : ' #This is used to read like by line, working.
+        while IFS= read -r line
+        do
+        echo "$line"
+        done < "$INPUT"
+        rm -r test.tmp
+
+        # I can also use For loop
+        for OUTPUT in $(cat test.tmp)
+        do
+            echo $OUTPUT
+            sleep 1
+        done
+        '
+        APP=$(whiptail --title "Enter the Name of your App" --inputbox "Here is a list of your Existings Apps:\n$(cat -n test.tmp)" 15 60 3>&1 1>&2 2>&3)
+        exitstatus=$?
+        if [ $exitstatus = 0 ]; then
+            echo "Your Choosen App:" $APP
+            for OUTPUT in $(cat test.tmp)
+            do
+                if [[ "$OUTPUT" == "$APP" ]];
+                then
+                    funUpdateapp $iam $carry
+                    break
+                else
+                    echo "Continuing the loop to check other values"
+                fi
+            done
+            whiptail --title "Error" --msgbox "You might have enetred a wrong APP name; Choose Ok to re-enter/continue." 10 60
+            funUpdatemenu
+        else
+            echo "You Chose to Cancel"
+        fi
+    fi
+}
+#Update App
+## Here user can update his existing app, it can be any app, that is installed in Dokku
+function funUpdateapp()
+{
+    cf=$1
+    carry=$2
+    iam=funUpdateapp
+    # Check if any apps exists and pop a screen to choose the app he want to update
+    # If only one app exists try to automate this step.
+    # Once the app is selected he can choose another particular section
+        # Change Name
+            # Give Warning for not to change
+        # Update ENV variables
+        # Update App
+        # Change Domain Name
+        # Add a New Buildpack
+        # Add a New Plugin
+        # Other
+    rm -r test.tmp
+    while [ 1 ]
+    do
+    CHOICE=$(
+    whiptail --title "Updating the App: $APP" --menu "Choose the section you want to update" 20 60 6 \
+        "1)" "Add/Update ENV Varibales."   \
+        "2)" "Update to the Latest Version." \
+        "3)" "Change Your Domain Name" \
+        "4)" "Add a New Plugin" \
+        "5)" "Add a New Buildpack" \
+        "9)" "End script"  3>&2 2>&1 1>&3	
+    )
+
+    result=$(whoami)
+    case $CHOICE in
+        "1)")
+            funENV $iam $carry
+            wait
+            result="Let me know, if you find any errors or need updates to the script"
+        ;;
+        
+        "2)")
+            if [[ "$APP" == nforem ]];
+            then
+                dokku git:sync --build nforem https://github.com/akhil-naidu/forem.git
+                wait
+                result="Let me know, if you find any errors or need updates to the script"
+            else
+                result="Coming Soon"
+            fi
+        ;;
+
+        "3)")
+            result="Coming Soon"
+        ;;
+
+        "4)")
+            result="Coming Soon"
+        ;;
+
+        "5)")
+            result="Coming Soon"
+        ;;
+        "9)") exit
+        ;;
+    esac
+    whiptail --msgbox "$result" 10 60
+    done
 }
 
 # Setup Menu
@@ -87,6 +229,8 @@ function funAdv()
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
         echo "your chose $CHOICE"
+        whiptail --title "Under Construction" --msgbox "Advanced Setup is under construction. Cick Ok to continue with Step by Step setup" 10 60
+        funSBS $iam $carry
     else
         echo "You chose Cancel."
         exit
@@ -112,7 +256,14 @@ function funSBS()
     )
     exitstatus=$?
     if [ $exitstatus = 0 ]; then
-        $CHOICE $iam $carry
+        # $CHOICE $iam $carry
+        if [[ "$CHOICE" == "funForem" ]];
+        then
+            $CHOICE $iam $carry
+        else
+            whiptail --title "Under Construction" --msgbox " Choose Ok to re-visit App Selection Menu." 10 60
+            funSBS $iam $carry
+        fi
     else
         echo "You chose Cancel."
         exit
@@ -124,6 +275,10 @@ function funSBS()
 ## Around 5 fucntions
 function funENV()
 {
+    cf=$1
+    carry=$2
+    iam=funENV
+
     while true; do
         read -r -p "${YELLOW}    Do you wish to manually add a new ENV varibale?${END} (Y/N): " answer
         case $answer in
@@ -135,7 +290,8 @@ function funENV()
                     echo "$ENV=$ENV_VALUE" ;;
             [Nn]* )
                 echo "${YELLOW}    I hope you finished adding all your ENV varibales${END}"
-                echo "${RED}    Exited... Manual ENV Varibale Setup${END}"
+                echo "${RED}    Exiting... Manual ENV Varibale Setup${END}"
+                $cf $iam $carry
                 break;;
             * )
                 echo "${RED}Please answer Y or N.${END}";;
@@ -147,14 +303,14 @@ function funENV()
 # Automatic
 ## User will choose his desired platform, for staters we will add only one app Forem.
 ## Around 5 Apps
-## Forem
+## Forem #App 01
 function funForem()
 {
     # Pre-requisites Message
     cf=$1
     carry=$2
     iam="funForem"
-    : ' # This is not required now.
+    # This is not required now.
 
     whiptail --title "Pre-Requisites" --msgbox "In order for you to have a successful Forem Installaton.\n
     1. Point you DNS to the IP address of this server. (A Record)
@@ -167,13 +323,9 @@ function funForem()
         COMMUNITY_NAME
         FOREM_OWNER_SECRET
         HONEYBADGER_API_KEY
-        HONEYBADGER_JS_API_KEY
-        AWS_ID 
-        AWS_SECRET
-        AWS_BUCKET_NAME
-        AWS_UPLOAD_REGION" 20 70
+        HONEYBADGER_JS_API_KEY" 20 60
     wait
-    '
+    
     # Create App
     echo "${YELLOW}Creating an app named nforem${END}"
     echo "stopping all previously and automatically created Forems"
@@ -302,6 +454,7 @@ function funForem()
     echo "${GREEN}There you go :), Leave a like if you successfully configured your Forem${END}" 
 }
 
+## Ghost #App 02
 function funGhost()
 {
     cf=$1
@@ -384,24 +537,30 @@ function funCheck()
     ## If not exits Let him download.
     if which dokku >/dev/null; then
         echo "${GREEN}Dokku Exists${END}"
-        # Promt for update
-        if (whiptail --title "Updating Dokku" --yes-button "Update" --no-button "Skip"  --yesno "Would you like to update your Dokku?" 10 60) then
-            echo "${YELLOW}You chose Update.${END}"
-            # Update Dokku
-            echo "${YELLOW}Upgrading Dokku${END}"
-            sudo apt-get -y update -qq
-            wait
-            sudo apt-get -qq -y --no-install-recommends install dokku herokuish sshcommand plugn gliderlabs-sigil dokku-update dokku-event-listener
-            wait
-            sudo apt -y upgrade &
-            process_id=$!
-            wait $process_id
-            echo "Exit status: $?"
-            echo "${YELLOW}Now you have the latest Version of Dokku${END}"
-            # Dokku Updated
+        DOKKU_VERSION="$(dokku -v | awk '{print $3}')"
+        if [[ "$DOKKU_VERSION" == "0.24.10" ]];
+        then
+            echo "${YELLOW}Dokku Version: ${GREEN}0.24.10${END} => Skipping Dokku Update promt"
         else
-            echo "${Yellow}You chose to skip dokku updates.${END}"
-            # Dokku Update skipped
+            # Promt for update
+            if (whiptail --title "Updating Dokku" --yes-button "Update" --no-button "Skip"  --yesno "Would you like to update your Dokku?" 10 60) then
+                echo "${YELLOW}You chose Update.${END}"
+                # Update Dokku
+                echo "${YELLOW}Upgrading Dokku${END}"
+                sudo apt-get -y update -qq
+                wait
+                sudo apt-get -qq -y --no-install-recommends install dokku herokuish sshcommand plugn gliderlabs-sigil dokku-update dokku-event-listener
+                wait
+                sudo apt -y upgrade &
+                process_id=$!
+                wait $process_id
+                echo "Exit status: $?"
+                echo "${YELLOW}Now you have the latest Version of Dokku${END}"
+                # Dokku Updated
+            else
+                echo "${Yellow}You chose to skip dokku updates.${END}"
+                # Dokku Update skipped
+            fi
         fi
     else
         echo "${RED}Dokku does not exist${END}"
