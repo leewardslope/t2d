@@ -1,0 +1,90 @@
+### Place this file in /usr/local/bin/(name of cli without .sh)
+### give permissions with chmod +x /usr/local/bin/cli
+
+#!/usr/bin/env bash
+
+set -e
+
+show_help() {
+    echo ""
+    echo "Usage: foremctl {console|deploy|help|rake|restart|start|stat|status|stop|update|version}"
+    echo ""
+    echo "console         Open a Rails console"
+    echo "deploy          Updates and deploy the most current version of Forem"
+    echo "help            Show this message"
+    echo "rake            Run a rake task"
+    echo "restart         Restart Forem"
+    echo "start           Start Forem"
+    echo "stats           Show CPU, RAM, Disk IO usage of the Forem containers"
+    echo "status          Show the current running Forem containers"
+    echo "stop            Stop Forem"
+    echo "update          Updates Forem to the lastest container"
+    echo "version         Shows information on the current running version of Forem"
+    exit 0
+}
+
+case $1 in
+
+        console)
+        echo "Launching Forem Console..."
+        sudo /usr/bin/podman exec --env RUBYOPT='-W0' -it forem-rails bundle exec rails c
+        ;;
+
+        deploy)
+        echo "Deploying Forem!"
+        echo ""
+        echo "Updating Forem container..."
+        sudo /usr/local/bin/foremimg
+        echo ""
+        echo "Restarting Forem service..."
+        sudo /usr/bin/systemctl restart forem.service
+        sudo /usr/bin/podman image prune -f
+        ;;
+
+        rake)
+        sudo /usr/bin/podman exec --env RUBYOPT=-W0 --env DD_TRACE_STARTUP_LOGS=false -it forem-rails bundle exec rake $2
+        ;;
+
+        status)
+        sudo /usr/bin/podman ps -a
+        ;;
+
+        stats)
+        sudo /usr/bin/podman stats
+        ;;
+
+        stop)
+        echo "Stopping Forem..."
+        sudo systemctl stop forem.service
+        ;;
+
+        start)
+        echo "Starting Forem..."
+        sudo systemctl start forem.service
+        ;;
+
+        restart)
+        echo "Restarting Forem..."
+        sudo systemctl restart forem.service
+        ;;
+
+        update)
+        echo "Updating Forem..."
+        sudo /usr/local/bin/foremimg
+        ;;
+
+        version)
+        sudo /usr/bin/podman images --format {% raw %}"Repository: {{.Repository}}:{{.Tag}} SHA256: {{.Id}} Created: {{.CreatedSince}}"{% endraw %} localhost/forem/forem:current|head -1
+        ;;
+
+        help)
+        show_help
+        ;;
+
+        *)
+        echo "Unknown command!"
+        show_help
+        exit 1
+        ;;
+
+esac
