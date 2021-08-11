@@ -18,7 +18,7 @@ dokku certs:add vscode < leewardslope.com.tar
 ## Final Steps
 dokku git:initialize
 dokku git:set vscode deploy-branch main
-dokku git:sync --build site https://github.com/leewardslope/vscode
+dokku git:sync --build vscode https://github.com/leewardslope/vscode
 
 ## Adding Persistance
 mkdir -p /var/lib/dokku/data/storage/vscode
