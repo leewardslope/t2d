@@ -19,10 +19,12 @@ dokku certs:add vscode < leewardslope.com.tar
 dokku git:initialize
 dokku git:set vscode deploy-branch main
 dokku git:sync --build vscode https://github.com/leewardslope/vscode
+dokku proxy:ports-remove vscode http:80:5000 https:443:5000
+dokku proxy:ports-add vscode http:80:8080 https:443:8080
 
 ## Adding Persistance
 mkdir -p /var/lib/dokku/data/storage/vscode
 
-<!-- dokku storage:mount vscode /var/lib/dokku/data/storage/vscode-projects:/root/.(...)
-dokku storage:mount ghost /root/ghost/content:/var/lib/ghost/content -->
+dokku storage:mount vscode /var/lib/dokku/data/storage/vscode/:/home/coder/project
+dokku ps:rebuild vscode
 ```
