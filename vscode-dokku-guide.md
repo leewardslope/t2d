@@ -23,8 +23,8 @@ dokku proxy:ports-remove vscode http:80:5000 https:443:5000
 dokku proxy:ports-add vscode http:80:8080 https:443:8080
 
 ## Adding Persistance
-mkdir -p /var/lib/dokku/data/storage/vscode
-
-dokku storage:mount vscode /var/lib/dokku/data/storage/vscode/:/home/coder/project
+mkdir /var/lib/dokku/data/storage/vscode
+chown dokku:dokku /var/lib/dokku/data/storage/vscode
+dokku storage:mount vscode /var/lib/dokku/data/storage/vscode/:/home/coder/
 dokku ps:rebuild vscode
 ```
