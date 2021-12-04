@@ -160,7 +160,7 @@ function funUpdateapp()
         "2)")
             if [[ "$APP" == nforem ]];
             then
-                dokku git:sync --build nforem https://github.com/akhil-naidu/forem.git
+                dokku git:sync --build nforem https://github.com/forem/forem.git
                 wait
                 result="Let me know, if you find any errors or need updates to the script"
             else
@@ -453,7 +453,7 @@ function funForem()
     wait
     dokku git:set nforem deploy-branch main
     wait
-    dokku git:sync --build nforem https://github.com/akhil-naidu/forem.git
+    dokku git:sync --build nforem https://github.com/forem/forem.git
     wait 
     echo "${GREEN}There you go :), Leave a like if you successfully configured your Forem${END}" 
 }
